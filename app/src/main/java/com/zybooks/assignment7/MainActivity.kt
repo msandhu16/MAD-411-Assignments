@@ -1,6 +1,8 @@
 package com.zybooks.assignment7
 
 import android.app.DatePickerDialog
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -18,6 +20,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var expenseDate: EditText
     private lateinit var submitButton: Button
     private lateinit var deleteButton: Button
+    private lateinit var implicitButton: Button
 
 
 
@@ -34,18 +37,29 @@ class MainActivity : AppCompatActivity() {
         expenseAmount = findViewById(R.id.expenseAmount)
         expenseDate = findViewById(R.id.expenseDate)
         submitButton = findViewById(R.id.button)
-//        deleteButton = findViewById(R.id.button2)
+        implicitButton = findViewById(R.id.implicitIntent)
 
         // Set up RecyclerView and Adapter
         val recyclerView: RecyclerView = findViewById(R.id.my_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        expenseAdapter = ExpenseAdapter(expenseArray)
+        expenseAdapter = ExpenseAdapter(expenseArray,this)
         recyclerView.adapter = expenseAdapter
         setDatePicker()
 
         submitButton.setOnClickListener {
             showExpense()
         }
+
+        implicitButton.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                data = Uri.parse("https://www.canada.ca/en/financial-consumer-agency/services/covid-19-managing-financial-health.html")
+            }
+            startActivity(intent)
+        }
+
+
+
+
     }
 
     private fun showExpense() {

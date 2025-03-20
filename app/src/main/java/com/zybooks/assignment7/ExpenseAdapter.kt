@@ -1,5 +1,7 @@
 package com.zybooks.assignment7
 
+import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,7 +9,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class ExpenseAdapter(private val expenseArray: MutableList<Expense>) :
+class ExpenseAdapter(private val expenseArray: MutableList<Expense>,private val context: Context) :
     RecyclerView.Adapter<ExpenseAdapter.ViewHolder>() {
 
 
@@ -20,6 +22,7 @@ class ExpenseAdapter(private val expenseArray: MutableList<Expense>) :
         val expense_amount: TextView
         val deleteButton: Button
         val expense_date: TextView
+        val showDetailsButton: Button
 
 
         init {
@@ -28,11 +31,14 @@ class ExpenseAdapter(private val expenseArray: MutableList<Expense>) :
             expense_amount = view.findViewById(R.id.expense_amount)
             expense_date = view.findViewById(R.id.expense_date)
             deleteButton = view.findViewById(R.id.button2)
+            showDetailsButton = view.findViewById(R.id.show_details)
 
             deleteButton.setOnClickListener {
                 expense_name.text = "";
                 expense_amount.text = "";
             }
+
+
 
 
 
@@ -59,6 +65,8 @@ class ExpenseAdapter(private val expenseArray: MutableList<Expense>) :
 
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
+        val expense = expenseArray[position]
+
         viewHolder.expense_name.text =  expenseArray[position].name.toString()
         viewHolder.expense_amount.text =  expenseArray[position].amount.toString()
         viewHolder.expense_date.text = expenseArray[position].date.toString()
@@ -66,6 +74,14 @@ class ExpenseAdapter(private val expenseArray: MutableList<Expense>) :
             expenseArray.removeAt(position)
             this.notifyDataSetChanged()
 
+        }
+
+        viewHolder.showDetailsButton.setOnClickListener {
+            val intent = Intent(context, ExpenseDetailsActivity::class.java)
+            intent.putExtra("expense_name", expense.name)
+            intent.putExtra("expense_amount", expense.amount)
+            intent.putExtra("expense_date", expense.date)
+            context.startActivity(intent)
         }
 
 
