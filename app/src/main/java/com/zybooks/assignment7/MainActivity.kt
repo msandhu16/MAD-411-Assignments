@@ -1,11 +1,15 @@
 package com.zybooks.assignment7
 
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     private lateinit var expenseName: EditText
@@ -32,6 +36,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         expenseAdapter = ExpenseAdapter(expenseArray)
         recyclerView.adapter = expenseAdapter
+        setDatePicker()
 
         submitButton.setOnClickListener {
             showExpense()
@@ -52,12 +57,37 @@ class MainActivity : AppCompatActivity() {
         expenseArray.add(expenseObject)
         expenseAdapter.notifyDataSetChanged()
 
-        expenseNameText = ""
-        expenseAmountText = ""
-        expenseDateText = ""
+        expenseName.text.clear()
+        expenseAmount.text.clear()
+        expenseDate.text.clear()
 
 
 
+    }
+    private fun setDatePicker() {
+        val myCalendar = Calendar.getInstance()
+
+        val datePicker = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
+            myCalendar.set(Calendar.YEAR, year)
+            myCalendar.set(Calendar.MONTH, month)
+            myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+            updateLabel(myCalendar)
+        }
+
+        expenseDate.setOnClickListener {
+            DatePickerDialog(
+                this, datePicker,
+                myCalendar.get(Calendar.YEAR),
+                myCalendar.get(Calendar.MONTH),
+                myCalendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }
+    }
+
+    private fun updateLabel(calendar: Calendar) {
+        val myFormat = "yyyy-MM-dd"
+        val sdf = SimpleDateFormat(myFormat, Locale.CANADA)
+        expenseDate.setText(sdf.format(calendar.time))
     }
 
 }

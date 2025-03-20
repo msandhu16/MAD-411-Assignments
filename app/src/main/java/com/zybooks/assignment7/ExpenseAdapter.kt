@@ -19,14 +19,14 @@ class ExpenseAdapter(private val expenseArray: MutableList<Expense>) :
         val expense_name: TextView
         val expense_amount: TextView
         val deleteButton: Button
-//        val expense_date: TextView
+        val expense_date: TextView
 
 
         init {
             // Define click listener for the ViewHolder's View
             expense_name = view.findViewById(R.id.expense_name)
             expense_amount = view.findViewById(R.id.expense_amount)
-//            expense_date = view.findViewById(R.id.expense_date)
+            expense_date = view.findViewById(R.id.expense_date)
             deleteButton = view.findViewById(R.id.button2)
 
             deleteButton.setOnClickListener {
@@ -61,7 +61,7 @@ class ExpenseAdapter(private val expenseArray: MutableList<Expense>) :
         // contents of the view with that element
         viewHolder.expense_name.text =  expenseArray[position].name.toString()
         viewHolder.expense_amount.text =  expenseArray[position].amount.toString()
-//        viewHolder.expense_date.text = expenseArray[position].date.toString()
+        viewHolder.expense_date.text = expenseArray[position].date.toString()
         viewHolder.deleteButton.setOnClickListener {
             expenseArray.removeAt(position)
             this.notifyDataSetChanged()
