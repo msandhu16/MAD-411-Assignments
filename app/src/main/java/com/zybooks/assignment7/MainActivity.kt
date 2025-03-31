@@ -8,6 +8,8 @@ import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
@@ -56,6 +58,10 @@ class MainActivity : AppCompatActivity() {
             }
             startActivity(intent)
         }
+        val fragmentManager: FragmentManager = supportFragmentManager
+        val transaction: FragmentTransaction = fragmentManager.beginTransaction()
+        transaction.replace(R.id.headerFragmentContainer, HeaderFragment())
+        transaction.commit()
 
 
 
