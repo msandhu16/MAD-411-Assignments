@@ -73,6 +73,9 @@ class ExpenseAdapter(private val expenseArray: MutableList<Expense>,private val 
         viewHolder.deleteButton.setOnClickListener {
             expenseArray.removeAt(position)
             this.notifyDataSetChanged()
+            if (context is MainActivity) {
+                context.saveTasksToFile(context, expenseArray)
+            }
 
         }
 
