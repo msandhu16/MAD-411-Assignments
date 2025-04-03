@@ -3,6 +3,7 @@ package com.zybooks.assignment7
 import android.app.DatePickerDialog
 import android.content.Context
 import android.content.Intent
+import android.icu.util.Currency
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -10,15 +11,23 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Spinner
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.zybooks.assignment7.network.RetrofitInstance
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -38,6 +47,7 @@ class MainFragment : Fragment() {
     private lateinit var deleteButton: Button
     private lateinit var implicitButton: Button
     private val FILE_NAME = "expense.txt"
+    private lateinit var currencySpinner: Spinner
 
 
     private lateinit var expenseAdapter: ExpenseAdapter
@@ -60,6 +70,16 @@ class MainFragment : Fragment() {
         expenseDate = view.findViewById(R.id.expenseDate)
         submitButton = view.findViewById(R.id.button)
         implicitButton = view.findViewById(R.id.implicitIntent)
+        currencySpinner = view.findViewById(R.id.currencySpinner)
+
+        val currencies = Currency.getAvailableCurrencies().map { it.currencyCode }.sorted()
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, currencies)
+        currencySpinner.adapter = adapter
+
+        val defaultIndex = currencies.indexOfFirst { it == "CAD" }
+        if (defaultIndex >= 0) {
+            currencySpinner.setSelection(defaultIndex)
+        }
 
         // Set up RecyclerView and Adapter
         expenseArray.clear()
@@ -98,19 +118,32 @@ class MainFragment : Fragment() {
         var expenseNameText = expenseName.text.toString()
         var expenseAmountText = expenseAmount.text.toString()
         var expenseDateText = expenseDate.text.toString()
+        val selectedCurrencyCode = currencySpinner.selectedItem.toString()
+//        val selectedCurrency = Currency.getInstance(selectedCurrencyCode)
+//        val expenseAmountDouble = expenseAmountText.toDouble()
 
-        val expenseObject = Expense(
-            expenseNameText, expenseAmountText, expenseDateText
-        )
+//        val expenseObject = Expense(
+//            expenseNameText,
+//            expenseAmountText,
+//            expenseDateText,
+//
+//        )
 
-
-        expenseArray.add(expenseObject)
+//        expenseArray.add(expenseObject)
         saveTasksToFile(requireContext(), expenseArray)
         expenseAdapter.notifyDataSetChanged()
 
         expenseName.text.clear()
         expenseAmount.text.clear()
         expenseDate.text.clear()
+
+
+
+
+
+
+
+
 
 
     }
