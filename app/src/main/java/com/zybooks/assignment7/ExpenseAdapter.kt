@@ -2,14 +2,16 @@ package com.zybooks.assignment7
 
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 
-class ExpenseAdapter(private val expenseArray: MutableList<Expense>,private val context: Context) :
+class ExpenseAdapter(private val expenseArray: MutableList<Expense>,private val mainFragment : MainFragment) :
     RecyclerView.Adapter<ExpenseAdapter.ViewHolder>() {
 
 
@@ -72,19 +74,21 @@ class ExpenseAdapter(private val expenseArray: MutableList<Expense>,private val 
         viewHolder.expense_date.text = expenseArray[position].date.toString()
         viewHolder.deleteButton.setOnClickListener {
             expenseArray.removeAt(position)
+            mainFragment.deleteExpense(expense)
             this.notifyDataSetChanged()
-            if (context is MainActivity) {
-                context.saveTasksToFile(context, expenseArray)
-            }
+
+
 
         }
 
         viewHolder.showDetailsButton.setOnClickListener {
-            val intent = Intent(context, ExpenseDetailsActivity::class.java)
-            intent.putExtra("expense_name", expense.name)
-            intent.putExtra("expense_amount", expense.amount)
-            intent.putExtra("expense_date", expense.date)
-            context.startActivity(intent)
+            val bundle = Bundle().apply {
+                putString("expense_name", expense.name)
+                putString("expense_amount", expense.amount)
+                putString("expense_date", expense.date)
+            }
+
+           viewHolder.itemView.findNavController().navigate(R.id.action_mainFragmentToExpenseDetailFragment,bundle)
         }
 
 

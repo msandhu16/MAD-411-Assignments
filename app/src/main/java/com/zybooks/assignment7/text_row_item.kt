@@ -20,7 +20,7 @@ class text_row_item : AppCompatActivity() {
         val showDetailsButton = findViewById<Button>(R.id.show_details)
 
         showDetailsButton.setOnClickListener {
-            val intent = Intent(this, ExpenseDetailsActivity::class.java)
+            val intent = Intent(this, ExpenseDetailsFragment::class.java)
             startActivity(intent)
 
         }
