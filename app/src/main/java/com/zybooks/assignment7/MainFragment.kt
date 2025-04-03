@@ -62,7 +62,9 @@ class MainFragment : Fragment() {
         implicitButton = view.findViewById(R.id.implicitIntent)
 
         // Set up RecyclerView and Adapter
+        expenseArray.clear()
         expenseArray.addAll(loadTasksFromFile(requireContext()))
+
         val recyclerView: RecyclerView = view.findViewById(R.id.my_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         expenseAdapter = ExpenseAdapter(expenseArray, this)
