@@ -32,7 +32,6 @@ class ExpenseDetailsFragment : Fragment() {
         nameTextView.text = name
         amountTextView.text = "$$amount"
         dateTextView.text = date
-        // Inflate the layout for this fragment
         return view
 
     }
