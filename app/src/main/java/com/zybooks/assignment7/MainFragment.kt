@@ -119,24 +119,43 @@ class MainFragment : Fragment() {
         var expenseAmountText = expenseAmount.text.toString()
         var expenseDateText = expenseDate.text.toString()
         val selectedCurrencyCode = currencySpinner.selectedItem.toString()
-//        val selectedCurrency = Currency.getInstance(selectedCurrencyCode)
-//        val expenseAmountDouble = expenseAmountText.toDouble()
+        val selectedCurrency = Currency.getInstance(selectedCurrencyCode)
+        val expenseAmountDouble = expenseAmountText.toDouble()
+        lifecycleScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    RetrofitInstance.api.getPrice()
+                }
+                val exchangeRate = response.cad[selectedCurrencyCode] ?: 1.0
+                val convertedAmount = expenseAmountDouble * exchangeRate
 
-//        val expenseObject = Expense(
-//            expenseNameText,
-//            expenseAmountText,
-//            expenseDateText,
-//
-//        )
 
-//        expenseArray.add(expenseObject)
-        saveTasksToFile(requireContext(), expenseArray)
-        expenseAdapter.notifyDataSetChanged()
 
-        expenseName.text.clear()
-        expenseAmount.text.clear()
-        expenseDate.text.clear()
+                val expenseObject = Expense(
+                    expenseNameText,
+                    expenseAmountText,
+                    expenseDateText,
+                    selectedCurrency,
+                    convertedAmount
+                )
 
+                expenseArray.add(expenseObject)
+                saveTasksToFile(requireContext(), expenseArray)
+                expenseAdapter.notifyDataSetChanged()
+
+                expenseName.text.clear()
+                expenseAmount.text.clear()
+                expenseDate.text.clear()
+
+                Snackbar.make(requireView(), "Currency Conversion is successful: ", Snackbar.LENGTH_LONG).show()
+
+
+
+            } catch (e: Exception) {
+                Snackbar.make(requireView(), "Error calculating currency: ${e.message}", Snackbar.LENGTH_LONG).show()
+
+            }
+        }
 
 
 
