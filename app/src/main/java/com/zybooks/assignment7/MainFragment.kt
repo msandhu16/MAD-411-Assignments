@@ -3,7 +3,6 @@ package com.zybooks.assignment7
 import android.app.DatePickerDialog
 import android.content.Context
 import android.content.Intent
-import android.icu.util.Currency
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -11,15 +10,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Spinner
-import androidx.fragment.app.FragmentManager
+import android.widget.*
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
@@ -32,30 +26,22 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
-
-
-
+import java.util.*
 
 class MainFragment : Fragment() {
-
     private lateinit var expenseName: EditText
     private lateinit var expenseAmount: EditText
     private lateinit var expenseDate: EditText
     private lateinit var submitButton: Button
     private lateinit var deleteButton: Button
     private lateinit var implicitButton: Button
-    private val FILE_NAME = "expense.txt"
     private lateinit var currencySpinner: Spinner
+    private lateinit var conversionCheckBox: CheckBox
 
-
+    private val FILE_NAME = "expense.txt"
     private lateinit var expenseAdapter: ExpenseAdapter
     private val expenseArray = mutableListOf<Expense>()
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
+    private var currencyMap = mapOf<String, String>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,24 +50,16 @@ class MainFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_main, container, false)
         Log.d("ActivityLifecycle", "onCreate called")
 
-
         expenseName = view.findViewById(R.id.expenseName)
         expenseAmount = view.findViewById(R.id.expenseAmount)
         expenseDate = view.findViewById(R.id.expenseDate)
         submitButton = view.findViewById(R.id.button)
         implicitButton = view.findViewById(R.id.implicitIntent)
         currencySpinner = view.findViewById(R.id.currencySpinner)
+        conversionCheckBox = view.findViewById(R.id.conversionNeededCheckBox)
 
-        val currencies = Currency.getAvailableCurrencies().map { it.currencyCode }.sorted()
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, currencies)
-        currencySpinner.adapter = adapter
+        setupCurrencySpinner()
 
-        val defaultIndex = currencies.indexOfFirst { it == "CAD" }
-        if (defaultIndex >= 0) {
-            currencySpinner.setSelection(defaultIndex)
-        }
-
-        // Set up RecyclerView and Adapter
         expenseArray.clear()
         expenseArray.addAll(loadTasksFromFile(requireContext()))
 
@@ -89,82 +67,80 @@ class MainFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         expenseAdapter = ExpenseAdapter(expenseArray, this)
         recyclerView.adapter = expenseAdapter
+
         setDatePicker()
 
-        submitButton.setOnClickListener {
-            showExpense()
-        }
+        submitButton.setOnClickListener { showExpense() }
 
         implicitButton.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW).apply {
-                data =
-                    Uri.parse("https://www.canada.ca/en/financial-consumer-agency/services/covid-19-managing-financial-health.html")
+                data = Uri.parse("https://www.canada.ca/en/financial-consumer-agency/services/covid-19-managing-financial-health.html")
             }
             startActivity(intent)
         }
-        val fragmentManager: FragmentManager = requireActivity().supportFragmentManager
-        val transaction: FragmentTransaction = fragmentManager.beginTransaction()
-        transaction.replace(R.id.headerFragmentContainer, HeaderFragment())
-        transaction.commit()
 
+        val transaction: FragmentTransaction = requireActivity().supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.headerFragmentContainer, HeaderFragment()).commit()
 
         return view
-
     }
 
-
-    private fun showExpense() {
-
-        var expenseNameText = expenseName.text.toString()
-        var expenseAmountText = expenseAmount.text.toString()
-        var expenseDateText = expenseDate.text.toString()
-        val selectedCurrencyCode = currencySpinner.selectedItem.toString()
-        val selectedCurrency = Currency.getInstance(selectedCurrencyCode)
-        val expenseAmountDouble = expenseAmountText.toDouble()
+    private fun setupCurrencySpinner() {
         lifecycleScope.launch {
             try {
                 val response = withContext(Dispatchers.IO) {
-                    RetrofitInstance.api.getPrice()
+                    RetrofitInstance.api.getCurrencyCode()
                 }
-                val exchangeRate = response.cad[selectedCurrencyCode] ?: 1.0
-                val convertedAmount = expenseAmountDouble * exchangeRate
-
-
-
-                val expenseObject = Expense(
-                    expenseNameText,
-                    expenseAmountText,
-                    expenseDateText,
-                    selectedCurrency,
-                    convertedAmount
-                )
-
-                expenseArray.add(expenseObject)
-                saveTasksToFile(requireContext(), expenseArray)
-                expenseAdapter.notifyDataSetChanged()
-
-                expenseName.text.clear()
-                expenseAmount.text.clear()
-                expenseDate.text.clear()
-
-                Snackbar.make(requireView(), "Currency Conversion is successful: ", Snackbar.LENGTH_LONG).show()
-
-
-
+                currencyMap = response
+                val currencyList = response.keys.sorted()
+                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, currencyList)
+                currencySpinner.adapter = adapter
+                currencySpinner.setSelection(currencyList.indexOf("cad"))
             } catch (e: Exception) {
-                Snackbar.make(requireView(), "Error calculating currency: ${e.message}", Snackbar.LENGTH_LONG).show()
-
+                Snackbar.make(requireView(), "Error fetching currencies", Snackbar.LENGTH_LONG).show()
             }
         }
+    }
 
+    private fun showExpense() {
+        val name = expenseName.text.toString()
+        val amountText = expenseAmount.text.toString()
+        val date = expenseDate.text.toString()
+        val selectedCurrency = currencySpinner.selectedItem.toString()
 
+        if (name.isEmpty() || amountText.isEmpty() || date.isEmpty()) {
+            Snackbar.make(requireView(), "All fields must be filled", Snackbar.LENGTH_SHORT).show()
+            return
+        }
 
+        val amount = amountText.toDouble()
 
+        lifecycleScope.launch {
+            val convertedAmount = if (conversionCheckBox.isChecked) getConvertedAmount(selectedCurrency, amount) else amount
 
+            val expense = Expense(name, amountText, date, selectedCurrency, convertedAmount)
+            expenseArray.add(expense)
+            saveTasksToFile(requireContext(), expenseArray)
+            expenseAdapter.notifyDataSetChanged()
 
+            expenseName.text.clear()
+            expenseAmount.text.clear()
+            expenseDate.text.clear()
 
+            Snackbar.make(requireView(), "Expense saved.", Snackbar.LENGTH_LONG).show()
+        }
+    }
 
-
+    private suspend fun getConvertedAmount(currencyCode: String, baseAmount: Double): Double {
+        return try {
+            val response = withContext(Dispatchers.IO) {
+                RetrofitInstance.api.getPrice()
+            }
+            response.cad[currencyCode.lowercase()] ?: 1.0 * baseAmount
+        } catch (e: Exception) {
+            Snackbar.make(requireView(), "Conversion failed.", Snackbar.LENGTH_LONG).show()
+            baseAmount
+        }
     }
 
     private fun setDatePicker() {

@@ -17,9 +17,9 @@
             android:name=".text_row_item"
             android:exported="false"
             android:theme="@style/Theme.Assignment7" />
-        <activity
-            android:name=".ExpenseDetailsActivity"
-            android:exported="false" />
+<!--        <activity-->
+<!--            android:name=".ExpenseDetailsActivity"-->
+<!--            android:exported="false" />-->
         <activity
             android:name=".MainActivity"
             android:exported="true">

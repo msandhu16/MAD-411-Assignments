@@ -52,6 +52,29 @@
             android:layout_height="91dp"
             android:text="expense_date" />
 
+        <LinearLayout
+            android:id="@+id/amount_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_margin="8dp">
+
+            <TextView
+                android:id="@+id/converted_currency_symbol"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="expense_symbol"
+                android:textSize="14sp"
+                android:layout_marginEnd="4dp" />
+
+            <TextView
+                android:id="@+id/converted_currency_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="expense_number"
+                android:textSize="14sp" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </FrameLayout>

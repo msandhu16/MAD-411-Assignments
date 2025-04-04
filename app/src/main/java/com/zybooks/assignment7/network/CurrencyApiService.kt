@@ -7,7 +7,7 @@ import retrofit2.http.GET
 
 interface CurrencyApiService {
     @GET("currencies.json")
-    suspend fun getCountryCode(): Map<String, String>
+    suspend fun getCurrencyCode(): Map<String, String>
 
 
     @GET("currencies/cad.json")
