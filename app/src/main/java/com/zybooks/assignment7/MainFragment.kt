@@ -145,7 +145,7 @@ class MainFragment : Fragment() {
     }
     private fun isOverdue(dueDateStr: String): Boolean {
         return try {
-            val sdf = android.icu.text.SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            val sdf = android.icu.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             val dueDate = sdf.parse(dueDateStr)
             val today = Date()
             dueDate != null && dueDate.before(today)
