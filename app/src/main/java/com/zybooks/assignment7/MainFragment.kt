@@ -136,7 +136,7 @@ class MainFragment : Fragment() {
             val response = withContext(Dispatchers.IO) {
                 RetrofitInstance.api.getPrice()
             }
-            response.cad[currencyCode.lowercase()] ?: 1.0 * baseAmount
+            ((baseAmount / response.cad[currencyCode.lowercase()]!!) ?: (1.0 * baseAmount))
         } catch (e: Exception) {
             Snackbar.make(requireView(), "Conversion failed.", Snackbar.LENGTH_LONG).show()
             baseAmount

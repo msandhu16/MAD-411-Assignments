@@ -34,10 +34,10 @@ class ExpenseAdapter(
         val expense = expenseArray[position]
 
         viewHolder.expense_name.text = expense.name
-        viewHolder.expense_amount.text = expense.amount
+        viewHolder.expense_amount.text = "${expense.currency.uppercase()} ${expense.amount} "
         viewHolder.expense_date.text = expense.date
 
-        viewHolder.converted_symbol.text = expense.currency.uppercase()
+        viewHolder.converted_symbol.text = expense.currency.uppercase() ?: "CAD"
         viewHolder.converted_amount.text = expense.convertedCost.toString()
 
         viewHolder.deleteButton.setOnClickListener {
