@@ -1,4 +1,4 @@
 package com.zybooks.assignment7
 
 
-class Expense(var name: String, var amount: String, var date: String, val currency: String, val convertedCost: Double)
+data class Expense(var name: String, var amount: String, var date: String, val currency: String, val convertedCost: Double,val overdue: Boolean)

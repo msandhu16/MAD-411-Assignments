@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,6 +20,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.zybooks.assignment7.network.RetrofitInstance
+import com.zybooks.assignment7.service.OverdueCheckService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -85,6 +87,16 @@ class MainFragment : Fragment() {
         return view
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val serviceIntent = Intent(requireContext(), OverdueCheckService::class.java)
+        ContextCompat.startForegroundService(requireContext(), serviceIntent)
+
+
+
+    }
+
     private fun setupCurrencySpinner() {
         lifecycleScope.launch {
             try {
@@ -107,6 +119,7 @@ class MainFragment : Fragment() {
         val amountText = expenseAmount.text.toString()
         val date = expenseDate.text.toString()
         val selectedCurrency = currencySpinner.selectedItem.toString()
+        val overdue = isOverdue(date)
 
         if (name.isEmpty() || amountText.isEmpty() || date.isEmpty()) {
             Snackbar.make(requireView(), "All fields must be filled", Snackbar.LENGTH_SHORT).show()
@@ -118,7 +131,7 @@ class MainFragment : Fragment() {
         lifecycleScope.launch {
             val convertedAmount = if (conversionCheckBox.isChecked) getConvertedAmount(selectedCurrency, amount) else amount
 
-            val expense = Expense(name, amountText, date, selectedCurrency, convertedAmount)
+            val expense = Expense(name, amountText, date, selectedCurrency, convertedAmount,overdue)
             expenseArray.add(expense)
             saveTasksToFile(requireContext(), expenseArray)
             expenseAdapter.notifyDataSetChanged()
@@ -128,6 +141,16 @@ class MainFragment : Fragment() {
             expenseDate.text.clear()
 
             Snackbar.make(requireView(), "Expense saved.", Snackbar.LENGTH_LONG).show()
+        }
+    }
+    private fun isOverdue(dueDateStr: String): Boolean {
+        return try {
+            val sdf = android.icu.text.SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            val dueDate = sdf.parse(dueDateStr)
+            val today = Date()
+            dueDate != null && dueDate.before(today)
+        } catch (e: Exception) {
+            false
         }
     }
 
